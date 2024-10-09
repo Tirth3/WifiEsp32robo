@@ -27,68 +27,150 @@ const char index_html[] PROGMEM = R"rawliteral(
 </head>
 
 <style>
-    *
-    {
+    * {
         padding: 0;
         margin: 0;
     }
-    body
-    {
+
+    body {
         position: absolute;
         top: 0%;
         left: 0%;
         width: 100%;
         height: 100%;
-        background-color: pink;
-    }
-    .titlle
-    {
-        position: relative;
-        left: 35%;
-        padding-top: 10px;        
-    }
-    .butcontainer
-    {
-        position: relative;
-        top: 20%;
-        left: 40%;
-        background-color: rgba(14, 0, 0, 0);
-        width: 20%;
-        height: 50%;
+        background-color: #00bbf9;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        align-items: center;
     }
-    .dirbutt
-    {
+
+    .titlle {
+        /* position: relative;
+        left: 35%; */
+        padding-top: 30px;
+        padding-bottom: 30px;
+        color: #fee440;
         width: 100%;
+    }
+
+    .buttons {
         display: flex;
         justify-content: space-evenly;
+        flex-direction: column;
+        align-items: center;
+        width: 20%;
+        height: 30%;
+        background-color: #9b5de5;
+        border-radius: 50px;
+        box-shadow: rgba(0, 0, 0, 0.174) 8px 8px 5px 0;
+    }
+
+    .buttonForward {
+        background: #00f5d4;
+        border-radius: 999px;
+        box-shadow: #000000 0 10px 20px -10px;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-family: Inter, Helvetica, "Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+        opacity: 1;
+        outline: 0 solid transparent;
+        padding: 8px 18px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        width: fit-content;
+        word-break: break-word;
+        border: 0;
+    }
+
+    .buttonDir {
+        background: #9b5de5;
+        border-radius: 999px;
+        box-shadow: #000000 0 10px 20px -10px;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-family: Inter, Helvetica, "Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+        opacity: 1;
+        outline: 0 solid transparent;
+        padding: 8px 18px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        width: fit-content;
+        word-break: break-word;
+        border: 0;
+    }
+
+    .buttonStop {
+        background: #f15bb5;
+        border-radius: 999px;
+        box-shadow: #000000 0 10px 20px -10px;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-family: Inter, Helvetica, "Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+        opacity: 1;
+        outline: 0 solid transparent;
+        padding: 8px 18px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        width: fit-content;
+        word-break: break-word;
+        border: 0;
     }
 </style>
 
 <body>
-    <h1 class="titlle">Welcome to SHISHI Car server</h1>
-        <button onclick='sendFORWARD()'>FORWARD</button>
-        <div class="dirbutt">
-            <button onclick='sendLEFT()'>LEFT</button>
-            <button onclick='sendRIGHT()'>RIGHT</button>
+    <header>
+        <h1 class="titlle">Welcome to SHISHIMANU Car server</h1>
+    </header>
+
+
+    <div class="buttons">
+        <button class="buttonForward" onclick='sendFORWARD()'>FORWARD</button>
+        <div class="middlerow">
+            <button class="buttonDir" onclick='sendLEFT()'>LEFT</button>
+            <button class="buttonDir" onclick='sendBAKCWARD()'>BACKWARD</button>
+            <button class="buttonDir" onclick='sendRIGHT()'>RIGHT</button>
         </div>
-        <button onclick='sendBAKCWARD()'>BACKWARD</button>
-        <button onclick='sendSTOP()'>STOP</button>
+        <button class="buttonStop" onclick='sendSTOP()'>STOP</button>
+    </div>
+
 </body>
 <script>
-    document.addEventListener('keydown' , HandleKeyBoardInput);
-    var websocket = new WebSocket('ws://' + '192.168.237.230' + '/ws');
-    websocket.onmessage = function (event) { console.log('Message from ESP32:', event.data); };
-    websocket.onopen = onOpen;
-    websocket.onclose = onClose;
+    document.addEventListener('keydown', HandleKeyBoardInput);
+    document.addEventListener('onkeyup', KeyReleased);
+    window.addEventListener('load', onLoad);
+    var websocket; 
+    function initWebSocket() {
+        console.log('Trying to open a WebSocket connection...');
+        websocket = new WebSocket('ws://' + '192.168.237.230' + '/ws');
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = function (event) { console.log('Message from ESP32:', event.data); };
+    }
 
+    function onLoad() {
+        initWebSocket();
+    }
     function onOpen(event) {
         console.log('Connection opened');
     }
     function onClose(event) {
         console.log('Connection closed');
+        setTimeout(initWebSocket , 1000);
     }
 
     function sendLEFT() {
@@ -112,10 +194,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     }
 
 
-    function HandleKeyBoardInput(e)
-    {
-        switch(e.key)
-        {
+    function HandleKeyBoardInput(e) {
+        console.log(e.key);
+        switch (e.key) {
             case 'w':
                 sendFORWARD();
                 break;
@@ -128,14 +209,17 @@ const char index_html[] PROGMEM = R"rawliteral(
             case 'd':
                 sendRIGHT();
                 break;
-            case 'spacebar':
-            case ' ':
-                sendSTOP();
-                break;
         }
     }
+
+    function KeyReleased(e) {
+        console.log(e.key);
+        sendSTOP();
+    }
+
 </script>
-</htmlc>
+
+</html>
 )rawliteral";
 
 // Webserver at port 80
@@ -257,22 +341,12 @@ void loop()
       StopMotors();
       break;
     case 1: // FORWARD
-      if((PREVMOTORSTATE - MOTORSTATE) != 0)
-      {
-        StopMotors();
-        delay(10);
-      }
       digitalWrite(MOTOR_1_PIN_1 , HIGH);
       digitalWrite(MOTOR_1_PIN_2 , LOW);
       digitalWrite(MOTOR_2_PIN_1 , HIGH);
       digitalWrite(MOTOR_2_PIN_2 , LOW);
       break;
     case 2:  // BACKWARD
-      if((PREVMOTORSTATE - MOTORSTATE) != 0)
-      {
-        StopMotors();
-        delay(10);
-      }
       digitalWrite(MOTOR_1_PIN_1 , LOW);
       digitalWrite(MOTOR_1_PIN_2 , HIGH);
       digitalWrite(MOTOR_2_PIN_1 , LOW);
@@ -280,11 +354,6 @@ void loop()
       break;
 
     case 3:  // RIGHT
-      if((PREVMOTORSTATE - MOTORSTATE) != 0)
-      {
-        StopMotors();
-        delay(10);
-      }
       digitalWrite(MOTOR_1_PIN_1 , LOW);
       digitalWrite(MOTOR_1_PIN_2 , HIGH);
       digitalWrite(MOTOR_2_PIN_1 , HIGH);
@@ -292,11 +361,6 @@ void loop()
       break;
       
     case 4:  // LEFT
-      if((PREVMOTORSTATE - MOTORSTATE) != 0)
-      {
-        StopMotors();
-        delay(10);
-      }
       digitalWrite(MOTOR_1_PIN_1 , HIGH);
       digitalWrite(MOTOR_1_PIN_2 , LOW);
       digitalWrite(MOTOR_2_PIN_1 , LOW);
